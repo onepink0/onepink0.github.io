@@ -1,4 +1,4 @@
-/* 页脚与头图透明 */
+/* 椤佃剼涓庡ご鍥鹃€忔槑 */
 #footer {
     background: transparent !important;
 }
@@ -7,7 +7,7 @@
     background: transparent !important;
 }
 
-/* 白天模式遮罩透明 */
+/* 鐧藉ぉ妯″紡閬僵閫忔槑 */
 #footer::before {
     background: transparent !important;
 }
@@ -16,11 +16,24 @@
     background: transparent !important;
 }
 
-/* 夜间模式遮罩透明 */
+/* 澶滈棿妯″紡閬僵閫忔槑 */
 [data-theme="dark"] #footer::before {
     background: transparent !important;
 }
 
 [data-theme="dark"] #page-header::before {
     background: transparent !important;
+}
+
+/* 小冰分类分类磁铁黑夜模式适配 */
+/* 一般状态 */
+[data-theme="dark"] .magnet_link_context {
+    background: #1e1e1e;
+    color: antiquewhite;
+}
+
+/* 鼠标悬浮状态 */
+[data-theme="dark"] .magnet_link_context:hover {
+    background: #3ecdf1;
+    color: #f2f2f2;
 }

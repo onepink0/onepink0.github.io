@@ -4,6 +4,19 @@
   
     
     <entry>
+      <title>Creat</title>
+      <link href="/2025/04/24/use/"/>
+      <url>/2025/04/24/use/</url>
+      
+        <content type="html"><![CDATA[<h1 id="Creat"><a href="#Creat" class="headerlink" title="Creat"></a>Creat</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 文章标题</span><br><span class="line">date: 创建日期</span><br><span class="line">updated: 更新日期</span><br><span class="line">cover: 文章封面</span><br><span class="line">tags:</span><br><span class="line">    - </span><br><span class="line">categories:</span><br><span class="line">    - </span><br><span class="line">description: 文章描述</span><br><span class="line">swiper_index: 1 #置顶轮播图顺序，非负整数，数字越大越靠前</span><br><span class="line">---</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>存储器类型</title>
       <link href="/2025/04/19/%E5%AD%98%E5%82%A8%E5%99%A8%E7%B1%BB%E5%9E%8B/"/>
       <url>/2025/04/19/%E5%AD%98%E5%82%A8%E5%99%A8%E7%B1%BB%E5%9E%8B/</url>
@@ -11,6 +24,18 @@
         <content type="html"><![CDATA[<p>存储器按功能和特性可分为以下主要类型：</p><ol><li><strong>只读存储器 (ROM)</strong>  <ul><li>数据只读，不可更改，掉电数据保留。  </li><li>类型：掩膜ROM、PROM、EPROM、EEPROM。  </li><li>应用：固件、引导程序。</li></ul></li><li><strong>随机存取存储器 (RAM)</strong>  <ul><li>数据可读写，掉电数据丢失。  </li><li>类型：<ul><li><strong>SRAM</strong>（静态RAM）：用触发器存储，速度快，功耗高，常用作缓存。</li><li><strong>DRAM</strong>（动态RAM）：用电容存储，需刷新，密度高，成本低，常用作主存。</li></ul></li><li>应用：临时数据存储。</li></ul></li><li><strong>闪存 (Flash Memory)</strong>  <ul><li>非易失性，可电擦写，掉电数据保留。  </li><li>类型：NAND Flash（高密度，存储用）、NOR Flash（快速读，代码存储）。  </li><li>应用：U盘、SSD、嵌入式系统。</li></ul></li><li><strong>缓存存储器 (Cache)</strong>  <ul><li>高速SRAM，位于CPU与主存间，存储频繁访问数据。  </li><li>应用：提升处理器性能。</li></ul></li><li><strong>寄存器</strong>  <ul><li>位于CPU内部，极高速，存储临时数据或指令。  </li><li>应用：运算、控制。</li></ul></li><li><strong>其他类型</strong>  <ul><li><strong>FRAM</strong>：铁电存储器，非易失，读写快。  </li><li><strong>MRAM</strong>：磁性存储器，非易失，耐久性高。  </li><li><strong>PCMC</strong>（相变存储器）：利用材料相态变化存储。  </li><li>应用：新兴存储技术。</li></ul></li></ol>]]></content>
       
       
+      <categories>
+          
+          <category> 嵌入式 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 存储 </tag>
+            
+        </tags>
       
     </entry>
     
