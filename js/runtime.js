@@ -4,7 +4,7 @@ function createtime() {
   now.setTime(now.getTime() + 1000);
 
   // 启动时间
-  var start = new Date("09/05/1977 00:00:00");
+  var start = new Date("09/05/1977 12:56:00");
 
   // 旅行者距离计算
   var distance = Math.trunc(234000000 + (now - start) / 1000 * 17); // 千米
@@ -28,7 +28,7 @@ function createtime() {
       text-shadow: 1px 1px 2px #000;
       line-height: 1.8;
     ">
-      本站居然运行了 <span style="color:#ffd700">${days}</span> 天 
+      本站运行了 <span style="color:#ffd700">${days}</span> 天 
       <span style="color:#87cefa">${h}</span> 小时 
       <span style="color:#ffa07a">${m}</span> 分 
       <span style="color:#98fb98">${s}</span> 秒 

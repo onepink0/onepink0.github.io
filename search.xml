@@ -17,25 +17,19 @@
     
     
     <entry>
-      <title>存储器类型</title>
+      <title>测试1</title>
       <link href="/2025/04/19/%E5%AD%98%E5%82%A8%E5%99%A8%E7%B1%BB%E5%9E%8B/"/>
       <url>/2025/04/19/%E5%AD%98%E5%82%A8%E5%99%A8%E7%B1%BB%E5%9E%8B/</url>
       
-        <content type="html"><![CDATA[<p>存储器按功能和特性可分为以下主要类型：</p><ol><li><strong>只读存储器 (ROM)</strong>  <ul><li>数据只读，不可更改，掉电数据保留。  </li><li>类型：掩膜ROM、PROM、EPROM、EEPROM。  </li><li>应用：固件、引导程序。</li></ul></li><li><strong>随机存取存储器 (RAM)</strong>  <ul><li>数据可读写，掉电数据丢失。  </li><li>类型：<ul><li><strong>SRAM</strong>（静态RAM）：用触发器存储，速度快，功耗高，常用作缓存。</li><li><strong>DRAM</strong>（动态RAM）：用电容存储，需刷新，密度高，成本低，常用作主存。</li></ul></li><li>应用：临时数据存储。</li></ul></li><li><strong>闪存 (Flash Memory)</strong>  <ul><li>非易失性，可电擦写，掉电数据保留。  </li><li>类型：NAND Flash（高密度，存储用）、NOR Flash（快速读，代码存储）。  </li><li>应用：U盘、SSD、嵌入式系统。</li></ul></li><li><strong>缓存存储器 (Cache)</strong>  <ul><li>高速SRAM，位于CPU与主存间，存储频繁访问数据。  </li><li>应用：提升处理器性能。</li></ul></li><li><strong>寄存器</strong>  <ul><li>位于CPU内部，极高速，存储临时数据或指令。  </li><li>应用：运算、控制。</li></ul></li><li><strong>其他类型</strong>  <ul><li><strong>FRAM</strong>：铁电存储器，非易失，读写快。  </li><li><strong>MRAM</strong>：磁性存储器，非易失，耐久性高。  </li><li><strong>PCMC</strong>（相变存储器）：利用材料相态变化存储。  </li><li>应用：新兴存储技术。</li></ul></li></ol>]]></content>
+        <content type="html"><![CDATA[<h1 id="标题一"><a href="#标题一" class="headerlink" title="标题一"></a>标题一</h1><p>123456</p><h2 id="标题二"><a href="#标题二" class="headerlink" title="标题二"></a>标题二</h2><p>123456</p><blockquote><p>引用</p></blockquote><hr><ul><li>彩色文字<br>各种颜色的标签，包括：<span class='p red'>红色</span>、<span class='p yellow'>黄色</span>、<span class='p green'>绿色</span>、<span class='p cyan'>青色</span>、<span class='p blue'>蓝色</span>、<span class='p gray'>灰色</span>。</li><li>超大号文字<br>文档「开始」页面中的标题部分就是超大号文字。<span class='p center logo large'>Volantis</span><span class='p center small'>A Wonderful Theme for Hexo</span></li></ul>]]></content>
       
       
       <categories>
           
-          <category> 嵌入式 </category>
+          <category> 测试 </category>
           
       </categories>
       
-      
-        <tags>
-            
-            <tag> 存储 </tag>
-            
-        </tags>
       
     </entry>
     
