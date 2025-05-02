@@ -1,0 +1,363 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>kalmanl滤波 | 一采🍭</title><meta name="author" content="onepink"><meta name="copyright" content="onepink"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="卡尔曼滤波简介[TOC] 卡尔曼滤波（Kalman Filter）是一种高效的递归滤波器，用于从一系列不完全且含有噪声的测量数据中估计动态系统的状态。它在多个领域，如控制系统、导航、计算机视觉和经济学中都有广泛应用。卡尔曼滤波器的核心在于通过结合系统的动态模型和测量数据，在存在不确定性的情况下提供最优的状态估计。  基本原理卡尔曼滤波器通过两个主要步骤——预测（Predict）和更新（Update">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kalmanl滤波">
+<meta property="og:url" content="https://onepink0.github.io/2025/04/29/Kalman%E6%BB%A4%E6%B3%A2/index.html">
+<meta property="og:site_name" content="一采🍭">
+<meta property="og:description" content="卡尔曼滤波简介[TOC] 卡尔曼滤波（Kalman Filter）是一种高效的递归滤波器，用于从一系列不完全且含有噪声的测量数据中估计动态系统的状态。它在多个领域，如控制系统、导航、计算机视觉和经济学中都有广泛应用。卡尔曼滤波器的核心在于通过结合系统的动态模型和测量数据，在存在不确定性的情况下提供最优的状态估计。  基本原理卡尔曼滤波器通过两个主要步骤——预测（Predict）和更新（Update">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg">
+<meta property="article:published_time" content="2025-04-29T07:31:27.000Z">
+<meta property="article:modified_time" content="2025-05-02T16:27:43.092Z">
+<meta property="article:author" content="onepink">
+<meta property="article:tag" content="嵌入式">
+<meta property="article:tag" content="算法">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "kalmanl滤波",
+  "url": "https://onepink0.github.io/2025/04/29/Kalman%E6%BB%A4%E6%B3%A2/",
+  "image": "https://img.picui.cn/free/2025/04/29/6810399c73023.jpg",
+  "datePublished": "2025-04-29T07:31:27.000Z",
+  "dateModified": "2025-05-02T16:27:43.092Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "onepink",
+      "url": "https://onepink0.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://onepink0.github.io/2025/04/29/Kalman%E6%BB%A4%E6%B3%A2/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const hour = new Date().getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (theme === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else theme === 'light' ? activateLightMode() : activateDarkMode()
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-right"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'kalmanl滤波',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://www.fomal.cc/static/css/runtime.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiperstyle.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/font-awesome-animation.min.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/tag_plugins.css" media="defer" onload="this.media='all'"><script src="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/carousel-touch.js"></script><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/animate.min.css" media="print" onload="this.media='screen'"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(https://img.picui.cn/free/2025/04/29/6810399c73023.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pink.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://img.picui.cn/free/2025/04/29/6810399c73023.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">一采🍭</span></a><a class="nav-page-title" href="/"><span class="site-name">kalmanl滤波</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">kalmanl滤波</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-04-29T07:31:27.000Z" title="发表于 2025-04-29 15:31:27">2025-04-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-05-02T16:27:43.092Z" title="更新于 2025-05-03 00:27:43">2025-05-03</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B5%8C%E5%85%A5%E5%BC%8F/">嵌入式</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>13分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="卡尔曼滤波简介"><a href="#卡尔曼滤波简介" class="headerlink" title="卡尔曼滤波简介"></a>卡尔曼滤波简介</h1><p>[TOC]</p>
+<p>卡尔曼滤波（Kalman Filter）是一种高效的递归滤波器，用于从一系列不完全且含有噪声的测量数据中估计动态系统的状态。它在多个领域，如控制系统、导航、计算机视觉和经济学中都有广泛应用。卡尔曼滤波器的核心在于通过结合系统的动态模型和测量数据，在存在不确定性的情况下提供最优的状态估计。</p>
+<hr>
+<h2 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h2><p>卡尔曼滤波器通过两个主要步骤——<strong>预测（Predict）</strong>和<strong>更新（Update）</strong>——来实现状态估计：</p>
+<ol>
+<li><p><strong>预测</strong>：</p>
+<ul>
+<li>根据系统模型预测当前状态。</li>
+<li>更新状态的不确定性（用协方差表示）。</li>
+</ul>
+</li>
+<li><p><strong>更新</strong>：</p>
+<ul>
+<li>使用测量数据修正预测的状态。</li>
+<li>根据测量噪声和预测的不确定性调整状态估计。</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="数学表示"><a href="#数学表示" class="headerlink" title="数学表示"></a>数学表示</h2><p>卡尔曼滤波器通常用于<strong>线性动态</strong>系统，其状态和测量过程可以用以下方程描述：</p>
+<h3 id="状态方程"><a href="#状态方程" class="headerlink" title="状态方程"></a>状态方程</h3><p>$<br>\mathbf{x}<em>k = \mathbf{F}_k \mathbf{x}</em>{k-1} + \mathbf{B}_k \mathbf{u}_k + \mathbf{w}_k<br>$</p>
+<ul>
+<li>$\mathbf{x}_k$：时刻 (k) 的状态向量。</li>
+<li>$\mathbf{F}_k$：状态转移矩阵。</li>
+<li>$\mathbf{B}_k$：控制输入矩阵。</li>
+<li>$\mathbf{u}_k$：控制输入。</li>
+<li>$\mathbf{w}_k$：过程噪声，假设为零均值高斯白噪声，协方差为 $\mathbf{Q}_k$</li>
+</ul>
+<h3 id="测量方程"><a href="#测量方程" class="headerlink" title="测量方程"></a>测量方程</h3><p>$<br>\mathbf{z}_k = \mathbf{H}_k \mathbf{x}_k + \mathbf{v}_k<br>$</p>
+<ul>
+<li>$\mathbf{z}_k$：时刻 (k) 的测量向量。</li>
+<li>$\mathbf{H}_k$：测量矩阵。</li>
+<li>$\mathbf{v}_k$：测量噪声，假设为零均值高斯白噪声，协方差为$ \mathbf{R}_k$</li>
+</ul>
+<hr>
+<h2 id="卡尔曼滤波算法步骤"><a href="#卡尔曼滤波算法步骤" class="headerlink" title="卡尔曼滤波算法步骤"></a>卡尔曼滤波算法步骤</h2><p>卡尔曼滤波器的具体实现包括以下五个步骤：</p>
+<ol>
+<li><p><strong>预测状态</strong>：<br>$<br>\hat{\mathbf{x}}<em>{k|k-1} = \mathbf{F}_k \hat{\mathbf{x}}</em>{k-1|k-1} + \mathbf{B}_k \mathbf{u}_k<br>$</p>
+</li>
+<li><p><strong>预测协方差</strong>：<br>$<br>\mathbf{P}<em>{k|k-1} = \mathbf{F}_k \mathbf{P}</em>{k-1|k-1} \mathbf{F}_k^T + \mathbf{Q}_k<br>$</p>
+</li>
+<li><p><strong>计算卡尔曼增益</strong>：<br>$<br>\mathbf{K}<em>k = \mathbf{P}</em>{k|k-1} \mathbf{H}<em>k^T (\mathbf{H}_k \mathbf{P}</em>{k|k-1} \mathbf{H}_k^T + \mathbf{R}_k)^{-1}<br>$</p>
+</li>
+<li><p><strong>更新状态估计</strong>：<br>$<br>\hat{\mathbf{x}}<em>{k|k} = \hat{\mathbf{x}}</em>{k|k-1} + \mathbf{K}<em>k (\mathbf{z}_k - \mathbf{H}_k \hat{\mathbf{x}}</em>{k|k-1})<br>$</p>
+</li>
+<li><p><strong>更新协方差</strong>：<br>$<br>\mathbf{P}<em>{k|k} = (\mathbf{I} - \mathbf{K}_k \mathbf{H}_k) \mathbf{P}</em>{k|k-1}<br>$</p>
+</li>
+</ol>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://raw.githubusercontent.com/onepink0/Image-Hosting/master/img/Typo-202503290012417.png" alt="image-20250329001212185" style="zoom:50%;" /></p>
+<p><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://raw.githubusercontent.com/onepink0/Image-Hosting/master/img/Typo-202503291752085.png" alt="image-20250329175204974" style="zoom:50%;" /></p>
+<h2 id="代码应用部分-C语言"><a href="#代码应用部分-C语言" class="headerlink" title="代码应用部分(C语言)"></a>代码应用部分(C语言)</h2><h3 id="一阶卡尔曼"><a href="#一阶卡尔曼" class="headerlink" title="一阶卡尔曼"></a>一阶卡尔曼</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">float</span> X;    <span class="comment">// 估计值</span></span><br><span class="line">    <span class="type">float</span> P;    <span class="comment">// 估计误差协方差</span></span><br><span class="line">    <span class="type">float</span> Q;    <span class="comment">// 过程噪声</span></span><br><span class="line">    <span class="type">float</span> R;    <span class="comment">// 测量噪声</span></span><br><span class="line">    <span class="type">float</span> K;    <span class="comment">// 卡尔曼增益</span></span><br><span class="line">&#125; KalmanFilter;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* @brief	卡尔曼初始化</span></span><br><span class="line"><span class="comment">* @para		结构体、过程噪声、测量噪声、初估计值</span></span><br><span class="line"><span class="comment">* @return	无</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">Kalman_Init</span><span class="params">(KalmanFilter *kf, <span class="type">float</span> processNoise, <span class="type">float</span> measureNoise, <span class="type">float</span> estimate)</span> &#123;</span><br><span class="line">    kf-&gt;Q = processNoise;</span><br><span class="line">    kf-&gt;R = measureNoise;</span><br><span class="line">    kf-&gt;X = estimate;</span><br><span class="line">    kf-&gt;P = <span class="number">1.0f</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* @brief	卡尔曼更新</span></span><br><span class="line"><span class="comment">* @para		结构体、测量值</span></span><br><span class="line"><span class="comment">* @return	更新估计值</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">float</span> <span class="title function_">Kalman_update</span><span class="params">(KalmanFilter *kf, <span class="type">float</span> measure)</span> &#123;</span><br><span class="line">    kf-&gt;P += kf-&gt;Q;</span><br><span class="line">    kf-&gt;K = kf-&gt;P / (kf-&gt;P + kf-&gt;R);</span><br><span class="line">    kf-&gt;X += kf-&gt;K * (measure - kf-&gt;X);</span><br><span class="line">    kf-&gt;P *= (<span class="number">1.0f</span> - kf-&gt;K);</span><br><span class="line">    <span class="keyword">return</span> kf-&gt;X;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>PS:</strong> $\mathbf{H}_k$(状态转移矩阵)、$\mathbf{F}_k$(观测矩阵)被隐含为 1</p>
+<h4 id="Use："><a href="#Use：" class="headerlink" title="Use："></a>Use：</h4><p><strong>过程噪声</strong> <code>Q</code>：代表了系统模型的不确定性。若系统变化快、干扰大，<code>Q</code> 应设置得大些；若系统较稳定，<code>Q</code> 可设置得小些。</p>
+<p>如：在一个稳定的温度测量系统中，<code>Q</code> 可以设为 0.01；而在一个快速变化的加速度测量系统中，<code>Q</code> 可能要设为 0.1 甚至更大。</p>
+<p><strong>测量噪声 <code>R</code></strong>：反映了传感器测量的不确定性。传感器精度低、噪声大时，<code>R</code> 应设置得大些；传感器精度高、噪声小时，<code>R</code> 可设置得小些。</p>
+<p>如：一个普通的温度传感器，<code>R</code> 可以设为 0.1；而高精度的传感器，<code>R</code> 可能设为 0.01。</p>
+<p><strong>初始估计值 <code>X</code></strong>：通常可根据先验知识或传感器的初始测量值来设定。</p>
+<p>如：若测量温度，初始温度已知是 25 摄氏度，那么 <code>X</code> 就可以设为 25.0。</p>
+<p><code>Code</code>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 示例调用</span></span><br><span class="line">KalmanFilter tempFilter;</span><br><span class="line">Kalman_Init(&amp;tempFilter, <span class="number">0.01f</span>, <span class="number">0.1f</span>, <span class="number">25.0f</span>);	<span class="comment">//过程噪声、测量噪声、初估计值</span></span><br><span class="line"><span class="type">float</span> filteredValue = Kalman_update(&amp;tempFilter, <span class="number">26.5f</span>);  <span class="comment">// 传感器测得值</span></span><br></pre></td></tr></table></figure>
+<h3 id="二阶卡尔曼"><a href="#二阶卡尔曼" class="headerlink" title="二阶卡尔曼"></a>二阶卡尔曼</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">float</span> X[<span class="number">2</span>];     <span class="comment">// 状态变量 [值, 变化率]</span></span><br><span class="line">    <span class="type">float</span> P[<span class="number">2</span>][<span class="number">2</span>];  <span class="comment">// 误差协方差矩阵</span></span><br><span class="line">    <span class="type">float</span> Q[<span class="number">2</span>][<span class="number">2</span>];  <span class="comment">// 过程噪声</span></span><br><span class="line">    <span class="type">float</span> R;        <span class="comment">// 观测噪声</span></span><br><span class="line">    <span class="type">float</span> K[<span class="number">2</span>];     <span class="comment">// 卡尔曼增益</span></span><br><span class="line">&#125; KalmanFilter2;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief  初始化二阶卡尔曼滤波器</span></span><br><span class="line"><span class="comment"> * @param  kf           结构体指针</span></span><br><span class="line"><span class="comment"> * @param  q_value      过程噪声 (用于状态值)</span></span><br><span class="line"><span class="comment"> * @param  q_rate       过程噪声 (用于变化率)</span></span><br><span class="line"><span class="comment"> * @param  r_measure    观测噪声</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">Kalman2_Init</span><span class="params">(KalmanFilter2 *kf, <span class="type">float</span> q_value, <span class="type">float</span> q_rate, <span class="type">float</span> r_measure)</span> &#123;</span><br><span class="line">    kf-&gt;X[<span class="number">0</span>] = <span class="number">0.0f</span>;</span><br><span class="line">    kf-&gt;X[<span class="number">1</span>] = <span class="number">0.0f</span>;</span><br><span class="line">    </span><br><span class="line">    kf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">1.0f</span>; kf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">0.0f</span>;</span><br><span class="line">    kf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] = <span class="number">0.0f</span>; kf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] = <span class="number">1.0f</span>;</span><br><span class="line">    </span><br><span class="line">    kf-&gt;Q[<span class="number">0</span>][<span class="number">0</span>] = q_value;</span><br><span class="line">    kf-&gt;Q[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">0.0f</span>;</span><br><span class="line">    kf-&gt;Q[<span class="number">1</span>][<span class="number">0</span>] = <span class="number">0.0f</span>;</span><br><span class="line">    kf-&gt;Q[<span class="number">1</span>][<span class="number">1</span>] = q_rate;</span><br><span class="line">    </span><br><span class="line">    kf-&gt;R = r_measure;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief  二阶卡尔曼滤波更新</span></span><br><span class="line"><span class="comment"> * @param  kf           结构体指针</span></span><br><span class="line"><span class="comment"> * @param  measuredVal  传感器测量的值</span></span><br><span class="line"><span class="comment"> * @param  rate         该值的变化率</span></span><br><span class="line"><span class="comment"> * @param  dt           采样时间</span></span><br><span class="line"><span class="comment"> * @return 滤波后的值</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">float</span> <span class="title function_">Kalman2_update</span><span class="params">(KalmanFilter2 *kf, <span class="type">float</span> measuredVal, <span class="type">float</span> rate, <span class="type">float</span> dt)</span> &#123;</span><br><span class="line">    <span class="comment">// **预测阶段**</span></span><br><span class="line">    kf-&gt;X[<span class="number">0</span>] += dt * kf-&gt;X[<span class="number">1</span>];  <span class="comment">// 预测值 = 旧值 + 变化率 * dt</span></span><br><span class="line">    kf-&gt;X[<span class="number">1</span>] = rate;            <span class="comment">// 直接用输入的变化率</span></span><br><span class="line"></span><br><span class="line">    kf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] += dt * (dt * kf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] - kf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] - kf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] + kf-&gt;Q[<span class="number">0</span>][<span class="number">0</span>]);</span><br><span class="line">    kf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] -= dt * kf-&gt;P[<span class="number">1</span>][<span class="number">1</span>];</span><br><span class="line">    kf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] -= dt * kf-&gt;P[<span class="number">1</span>][<span class="number">1</span>];</span><br><span class="line">    kf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] += kf-&gt;Q[<span class="number">1</span>][<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// **计算卡尔曼增益**</span></span><br><span class="line">    <span class="type">float</span> S = kf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] + kf-&gt;R;</span><br><span class="line">    kf-&gt;K[<span class="number">0</span>] = kf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] / S;</span><br><span class="line">    kf-&gt;K[<span class="number">1</span>] = kf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] / S;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// **更新**</span></span><br><span class="line">    <span class="type">float</span> y = measuredVal - kf-&gt;X[<span class="number">0</span>];  <span class="comment">// 观测误差</span></span><br><span class="line">    kf-&gt;X[<span class="number">0</span>] += kf-&gt;K[<span class="number">0</span>] * y;</span><br><span class="line">    kf-&gt;X[<span class="number">1</span>] += kf-&gt;K[<span class="number">1</span>] * y;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// **更新误差协方差矩阵**</span></span><br><span class="line">    <span class="type">float</span> P00_temp = kf-&gt;P[<span class="number">0</span>][<span class="number">0</span>];</span><br><span class="line">    <span class="type">float</span> P01_temp = kf-&gt;P[<span class="number">0</span>][<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    kf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] -= kf-&gt;K[<span class="number">0</span>] * P00_temp;</span><br><span class="line">    kf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] -= kf-&gt;K[<span class="number">0</span>] * P01_temp;</span><br><span class="line">    kf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] -= kf-&gt;K[<span class="number">1</span>] * P00_temp;</span><br><span class="line">    kf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] -= kf-&gt;K[<span class="number">1</span>] * P01_temp;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> kf-&gt;X[<span class="number">0</span>];  <span class="comment">// 返回滤波后的值</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Use：-1"><a href="#Use：-1" class="headerlink" title="Use："></a>Use：</h4><p><strong>q_value</strong>表示状态值的过程噪声，反映了状态值在系统运行过程中受到的不确定干扰程度。</p>
+<p><strong>q_rate</strong>表示状态变化率的过程噪声，体现了状态变化率在系统运行时受到的不确定干扰程度。</p>
+<ul>
+<li><p>如果系统状态值或变化率比较<strong>稳定</strong>，受到的外界干扰小，那么 <code>q_value</code> 和 <code>q_rate</code> 可以设置得小一些， <code>0.001</code> 到 <code>0.01</code> 之间。如，在一个稳定的温度测量系统中，温度变化缓慢且稳定，此时可以将 <code>q_value</code> 和 <code>q_rate</code> 设置为较小的值。</p>
+</li>
+<li><p>如果系统状态值或变化率变化<strong>剧烈</strong>，或者容易受到外界干扰，那么 <code>q_value</code> 和 <code>q_rate</code> 应该设置得大一些， <code>0.1</code> 到 <code>1</code> 之间。如，在一个快速运动的物体的位置和速度测量系统中，由于物体运动可能受到各种外力干扰，状态值和变化率变化较大，需要将 <code>q_value</code> 和 <code>q_rate</code> 设置得大些。</p>
+</li>
+</ul>
+<p><strong>r_measure</strong>代表传感器测量值的噪声水平，反映了传感器测量的不准确程度。</p>
+<ul>
+<li>若传感器精度高，测量误差小，<code>r_measure</code> 可以设置得小一些，例如 <code>0.01</code> 到 <code>0.1</code> 之间。比如高精度的激光测距传感器，测量误差较小，<code>r_measure</code> 可以取较小值。</li>
+<li>若传感器精度低，测量误差大，<code>r_measure</code> 则需要设置得大一些，例如 <code>1</code> 到 <code>10</code> 之间。像一些普通的热敏电阻温度传感器，测量误差相对较大，<code>r_measure</code> 就需要设置得大些。</li>
+</ul>
+<p><code>Code</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">KalmanFilter2 kf;</span><br><span class="line"><span class="type">float</span> q_value = <span class="number">0.01f</span>;  <span class="comment">// 状态值的过程噪声</span></span><br><span class="line"><span class="type">float</span> q_rate = <span class="number">0.001f</span>;  <span class="comment">// 变化率的过程噪声</span></span><br><span class="line"><span class="type">float</span> r_measure = <span class="number">0.1f</span>; <span class="comment">// 观测噪声</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化卡尔曼滤波器</span></span><br><span class="line">Kalman2_Init(&amp;kf, q_value, q_rate, r_measure);</span><br><span class="line"><span class="type">float</span> filteredValue = Kalman2_Update(&amp;kf, measuredVal, rate, dt);</span><br></pre></td></tr></table></figure>
+<h3 id="拓展卡尔曼"><a href="#拓展卡尔曼" class="headerlink" title="拓展卡尔曼"></a>拓展卡尔曼</h3><p><strong>拓展卡尔曼滤波（EKF）</strong> 是 <strong>非线性系统</strong> 的卡尔曼滤波版本。</p>
+<p>EKF 的核心思想是： <strong>用泰勒展开的一阶线性近似来处理非线性方程</strong></p>
+<p>🚀 适用于<strong>机器人、无人机、惯导、GPS</strong> 等非线性滤波任务！</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;math.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEG_TO_RAD 0.0174533f  <span class="comment">// 角度转弧度</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    <span class="type">float</span> X[<span class="number">2</span>];     <span class="comment">// 状态变量 [角度, 角速度]</span></span><br><span class="line">    <span class="type">float</span> P[<span class="number">2</span>][<span class="number">2</span>];  <span class="comment">// 误差协方差矩阵</span></span><br><span class="line">    <span class="type">float</span> Q[<span class="number">2</span>][<span class="number">2</span>];  <span class="comment">// 过程噪声</span></span><br><span class="line">    <span class="type">float</span> R[<span class="number">2</span>][<span class="number">2</span>];  <span class="comment">// 观测噪声</span></span><br><span class="line">&#125; EKF;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief  EKF 初始化</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">EKF_Init</span><span class="params">(EKF *ekf, <span class="type">float</span> q_angle, <span class="type">float</span> q_gyro, <span class="type">float</span> r_angle, <span class="type">float</span> r_gyro)</span> &#123;</span><br><span class="line">    ekf-&gt;X[<span class="number">0</span>] = <span class="number">0.0f</span>;   <span class="comment">// 初始角度</span></span><br><span class="line">    ekf-&gt;X[<span class="number">1</span>] = <span class="number">0.0f</span>;   <span class="comment">// 初始角速度</span></span><br><span class="line"></span><br><span class="line">    ekf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] = <span class="number">1.0f</span>; ekf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">0.0f</span>;</span><br><span class="line">    ekf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] = <span class="number">0.0f</span>; ekf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] = <span class="number">1.0f</span>;</span><br><span class="line"></span><br><span class="line">    ekf-&gt;Q[<span class="number">0</span>][<span class="number">0</span>] = q_angle; ekf-&gt;Q[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">0.0f</span>;</span><br><span class="line">    ekf-&gt;Q[<span class="number">1</span>][<span class="number">0</span>] = <span class="number">0.0f</span>; ekf-&gt;Q[<span class="number">1</span>][<span class="number">1</span>] = q_gyro;</span><br><span class="line"></span><br><span class="line">    ekf-&gt;R[<span class="number">0</span>][<span class="number">0</span>] = r_angle; ekf-&gt;R[<span class="number">0</span>][<span class="number">1</span>] = <span class="number">0.0f</span>;</span><br><span class="line">    ekf-&gt;R[<span class="number">1</span>][<span class="number">0</span>] = <span class="number">0.0f</span>; ekf-&gt;R[<span class="number">1</span>][<span class="number">1</span>] = r_gyro;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @brief  EKF 更新</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">EKF_Update</span><span class="params">(EKF *ekf, <span class="type">float</span> measured_angle, <span class="type">float</span> gyro_rate, <span class="type">float</span> dt)</span> &#123;</span><br><span class="line">    <span class="comment">// **1. 状态预测** (非线性系统：角度 = 旧角度 + 角速度 * dt)</span></span><br><span class="line">    ekf-&gt;X[<span class="number">0</span>] += dt * ekf-&gt;X[<span class="number">1</span>]; <span class="comment">// 预测角度</span></span><br><span class="line">    ekf-&gt;X[<span class="number">1</span>] = gyro_rate;       <span class="comment">// 预测角速度</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// **2. 计算雅可比矩阵 F**</span></span><br><span class="line">    <span class="type">float</span> F[<span class="number">2</span>][<span class="number">2</span>] = &#123;&#123;<span class="number">1</span>, dt&#125;, &#123;<span class="number">0</span>, <span class="number">1</span>&#125;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// **3. 预测误差协方差 P**</span></span><br><span class="line">    <span class="type">float</span> P_temp[<span class="number">2</span>][<span class="number">2</span>] = &#123;</span><br><span class="line">        &#123;F[<span class="number">0</span>][<span class="number">0</span>] * ekf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] + F[<span class="number">0</span>][<span class="number">1</span>] * ekf-&gt;P[<span class="number">1</span>][<span class="number">0</span>], F[<span class="number">0</span>][<span class="number">0</span>] * ekf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] + F[<span class="number">0</span>][<span class="number">1</span>] * ekf-&gt;P[<span class="number">1</span>][<span class="number">1</span>]&#125;,</span><br><span class="line">        &#123;F[<span class="number">1</span>][<span class="number">0</span>] * ekf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] + F[<span class="number">1</span>][<span class="number">1</span>] * ekf-&gt;P[<span class="number">1</span>][<span class="number">0</span>], F[<span class="number">1</span>][<span class="number">0</span>] * ekf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] + F[<span class="number">1</span>][<span class="number">1</span>] * ekf-&gt;P[<span class="number">1</span>][<span class="number">1</span>]&#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    ekf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] = P_temp[<span class="number">0</span>][<span class="number">0</span>] + ekf-&gt;Q[<span class="number">0</span>][<span class="number">0</span>];</span><br><span class="line">    ekf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] = P_temp[<span class="number">0</span>][<span class="number">1</span>] + ekf-&gt;Q[<span class="number">0</span>][<span class="number">1</span>];</span><br><span class="line">    ekf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] = P_temp[<span class="number">1</span>][<span class="number">0</span>] + ekf-&gt;Q[<span class="number">1</span>][<span class="number">0</span>];</span><br><span class="line">    ekf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] = P_temp[<span class="number">1</span>][<span class="number">1</span>] + ekf-&gt;Q[<span class="number">1</span>][<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// **4. 计算测量雅可比矩阵 H**</span></span><br><span class="line">    <span class="type">float</span> H[<span class="number">2</span>][<span class="number">2</span>] = &#123;&#123;<span class="number">1</span>, <span class="number">0</span>&#125;, &#123;<span class="number">0</span>, <span class="number">1</span>&#125;&#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// **5. 计算卡尔曼增益 K**</span></span><br><span class="line">    <span class="type">float</span> S[<span class="number">2</span>][<span class="number">2</span>] = &#123;</span><br><span class="line">        &#123;ekf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] + ekf-&gt;R[<span class="number">0</span>][<span class="number">0</span>], ekf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] + ekf-&gt;R[<span class="number">0</span>][<span class="number">1</span>]&#125;,</span><br><span class="line">        &#123;ekf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] + ekf-&gt;R[<span class="number">1</span>][<span class="number">0</span>], ekf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] + ekf-&gt;R[<span class="number">1</span>][<span class="number">1</span>]&#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="type">float</span> K[<span class="number">2</span>][<span class="number">2</span>] = &#123;</span><br><span class="line">        &#123;ekf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] / S[<span class="number">0</span>][<span class="number">0</span>], ekf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] / S[<span class="number">0</span>][<span class="number">1</span>]&#125;,</span><br><span class="line">        &#123;ekf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] / S[<span class="number">1</span>][<span class="number">0</span>], ekf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] / S[<span class="number">1</span>][<span class="number">1</span>]&#125;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// **6. 更新状态**</span></span><br><span class="line">    <span class="type">float</span> Y[<span class="number">2</span>] = &#123;measured_angle - ekf-&gt;X[<span class="number">0</span>], <span class="number">0</span> - ekf-&gt;X[<span class="number">1</span>]&#125;;</span><br><span class="line">    ekf-&gt;X[<span class="number">0</span>] += K[<span class="number">0</span>][<span class="number">0</span>] * Y[<span class="number">0</span>] + K[<span class="number">0</span>][<span class="number">1</span>] * Y[<span class="number">1</span>];</span><br><span class="line">    ekf-&gt;X[<span class="number">1</span>] += K[<span class="number">1</span>][<span class="number">0</span>] * Y[<span class="number">0</span>] + K[<span class="number">1</span>][<span class="number">1</span>] * Y[<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// **7. 更新误差协方差**</span></span><br><span class="line">    ekf-&gt;P[<span class="number">0</span>][<span class="number">0</span>] -= K[<span class="number">0</span>][<span class="number">0</span>] * ekf-&gt;P[<span class="number">0</span>][<span class="number">0</span>];</span><br><span class="line">    ekf-&gt;P[<span class="number">0</span>][<span class="number">1</span>] -= K[<span class="number">0</span>][<span class="number">1</span>] * ekf-&gt;P[<span class="number">0</span>][<span class="number">1</span>];</span><br><span class="line">    ekf-&gt;P[<span class="number">1</span>][<span class="number">0</span>] -= K[<span class="number">1</span>][<span class="number">0</span>] * ekf-&gt;P[<span class="number">1</span>][<span class="number">0</span>];</span><br><span class="line">    ekf-&gt;P[<span class="number">1</span>][<span class="number">1</span>] -= K[<span class="number">1</span>][<span class="number">1</span>] * ekf-&gt;P[<span class="number">1</span>][<span class="number">1</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>Use</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">EKF ekf;</span><br><span class="line">EKF_Init(&amp;ekf, 0.01f, 0.001f, 0.03f, 0.01f);	//推荐值</span><br><span class="line">//float q_angle, float q_gyro, float r_angle, float r_gyro</span><br><span class="line">	</span><br><span class="line">float measured_angle = 30.0f;  </span><br><span class="line">float gyro_rate = 2.0f;        </span><br><span class="line">float dt = 0.01f;            </span><br><span class="line"></span><br><span class="line">EKF_Update(&amp;ekf, measured_angle, gyro_rate, dt);</span><br></pre></td></tr></table></figure>
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+<th>影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>q_angle</code></td>
+<td>角度过程噪声协方差</td>
+<td>影响角度估计的平滑度，值 <strong>越大</strong>，对角速度的依赖性 <strong>越强</strong></td>
+</tr>
+<tr>
+<td><code>q_gyro</code></td>
+<td>角速度过程噪声协方差</td>
+<td>影响角速度的信任程度，值 <strong>越大</strong>，估计的角速度 <strong>变化越快</strong></td>
+</tr>
+<tr>
+<td><code>r_angle</code></td>
+<td>角度测量噪声协方差</td>
+<td>影响传感器测量的信任程度，值 <strong>越小</strong>，对测量值的信任度 <strong>越高</strong></td>
+</tr>
+<tr>
+<td><code>r_gyro</code></td>
+<td>角速度测量噪声协方差</td>
+<td>一般用于陀螺仪测量误差，影响滤波后角速度的平滑度</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>观察滤波输出，如果抖动明显，<strong>增大 Q，减小 R</strong></p>
+<p>如果反应迟钝，<strong>减小 Q，增大 R</strong></p>
+<h2 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h2><h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>在噪声和不确定性条件下提供最优估计。</li>
+<li>递归算法计算效率高，适合实时应用。</li>
+<li>实现简单，易于理解。</li>
+</ul>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>仅适用于线性系统和高斯噪声。</li>
+<li>对于非线性系统需使用扩展卡尔曼滤波（EKF）或无迹卡尔曼滤波（UKF）。</li>
+<li>对模型参数的准确性要求较高，模型误差可能导致结果偏差。</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://onepink0.github.io">onepink</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://onepink0.github.io/2025/04/29/Kalman%E6%BB%A4%E6%B3%A2/">https://onepink0.github.io/2025/04/29/Kalman%E6%BB%A4%E6%B3%A2/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://onepink0.github.io" target="_blank">一采🍭</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%B5%8C%E5%85%A5%E5%BC%8F/">嵌入式</a><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post-share"><div class="social-share" data-image="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2025/04/24/use/" title="Creat"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">Creat</div></div><div class="info-2"><div class="info-item-1">Creat123456789101112---title: 文章标题date: 创建日期updated: 更新日期cover: 文章封面tags:    - categories:    - description: 文章描述swiper_index: 1 #置顶轮播图顺序，非负整数，数字越大越靠前---</div></div></div></a><a class="pagination-related" href="/2025/05/03/%E7%8A%B6%E6%80%81%E6%9C%BA/" title="状态机"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">状态机</div></div><div class="info-2"><div class="info-item-1">状态机的实现概述 定义: 状态机（Finite State Machine, FSM）是一种设计模式，通过有限的状态和事件驱动来管理系统的行为。 核心元素: 状态（State）: 系统当前所处的条件（如IDLE、RUNNING）。 事件（Event）: 触发状态转换的信号（如START、STOP）。 转换（Transition）: 状态之间的切换。 动作（Action）: 状态转换或持续执行时的操作。   优点: 逻辑清晰、模块化、易维护，适合嵌入式系统。   简单方式(switch-case) 特点: 简单直接，适合小型状态机，状态和事件少时使用  Code Example: 123456789101112131415161718192021222324252627282930313233343536373839typedef enum &#123; STATE_IDLE, STATE_RUNNING, STATE_ERROR &#125; State;typedef enum &#123; EVENT_START, EVENT_STOP, EVENT_ERROR...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pink.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">onepink</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/onepink0"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/onepink0" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/671512108" target="_blank" title="Bili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a><a class="social-icon" href="https://qm.qq.com/q/HSaYN6T1qE" target="_blank" title="QQ"><i class="fab fa-qq" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E7%AE%80%E4%BB%8B"><span class="toc-text">卡尔曼滤波简介</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="toc-text">基本原理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E5%AD%A6%E8%A1%A8%E7%A4%BA"><span class="toc-text">数学表示</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E6%96%B9%E7%A8%8B"><span class="toc-text">状态方程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E9%87%8F%E6%96%B9%E7%A8%8B"><span class="toc-text">测量方程</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8D%A1%E5%B0%94%E6%9B%BC%E6%BB%A4%E6%B3%A2%E7%AE%97%E6%B3%95%E6%AD%A5%E9%AA%A4"><span class="toc-text">卡尔曼滤波算法步骤</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E5%BA%94%E7%94%A8%E9%83%A8%E5%88%86-C%E8%AF%AD%E8%A8%80"><span class="toc-text">代码应用部分(C语言)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E9%98%B6%E5%8D%A1%E5%B0%94%E6%9B%BC"><span class="toc-text">一阶卡尔曼</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Use%EF%BC%9A"><span class="toc-text">Use：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%8C%E9%98%B6%E5%8D%A1%E5%B0%94%E6%9B%BC"><span class="toc-text">二阶卡尔曼</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Use%EF%BC%9A-1"><span class="toc-text">Use：</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%8B%93%E5%B1%95%E5%8D%A1%E5%B0%94%E6%9B%BC"><span class="toc-text">拓展卡尔曼</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-text">优缺点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E7%82%B9"><span class="toc-text">优点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9"><span class="toc-text">缺点</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2025 By onepink</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"></div><script defer src="/js/cursor.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="25" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && (location.pathname ==='/'|| '/' ==='all')){
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="width:100%;height: auto"><div id="catalog_magnet"><div class="magnet_item"><a class="magnet_link" href="https://onepink0.github.io/categories/测试/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">📚 一采の嵌入式 (1)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item" style="visibility: hidden"></div><a class="magnet_link_more"  href="https://onepink0.github.io/categories" style="flex:1;text-align: center;margin-bottom: 10px;">查看更多...</a></div></div>';
+    console.log('已挂载magnet')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script><style>#catalog_magnet{flex-wrap: wrap;display: flex;width:100%;justify-content:space-between;padding: 10px 10px 0 10px;align-content: flex-start;}.magnet_item{flex-basis: calc(50% - 5px);background: #f2f2f2;margin-bottom: 10px;border-radius: 8px;transition: all 0.2s ease-in-out;}.magnet_item:hover{background: #69e8f2}.magnet_link_more{color:#555}.magnet_link{color:black}.magnet_link:hover{color:white}@media screen and (max-width: 600px) {.magnet_item {flex-basis: 100%;}}.magnet_link_context{display:flex;padding: 10px;font-size:16px;transition: all 0.2s ease-in-out;}.magnet_link_context:hover{padding: 10px 20px;}</style>
+    <style></style><script data-pjax>
+  function butterfly_footer_beautify_injector_config(){
+    var parent_div_git = document.getElementById('footer-wrap');
+    var item_html = '<div id="workboard"></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v6.2.0" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Frame-Hexo-blue?style=flat&amp;logo=hexo" alt=""/></a><a class="github-badge" target="_blank" href="https://butterfly.js.org/" style="margin-inline:5px" data-title="主题版本Butterfly_v4.3.1" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Theme-Butterfly-6513df?style=flat&amp;logo=bitdefender" alt=""/></a><a class="github-badge" target="_blank" href="https://github.com/" style="margin-inline:5px" data-title="本站项目由Github托管" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Source-Github-d021d6?style=flat&amp;logo=GitHub" alt=""/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Copyright-BY--NC--SA%204.0-d42328?style=flat&amp;logo=Claris" alt=""/></a></p>';
+    console.log('已挂载butterfly_footer_beautify')
+    parent_div_git.insertAdjacentHTML("beforeend",item_html)
+    }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_footer_beautify_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_footer_beautify_injector_config();
+  }
+  </script><script async src="/js/runtime.js"></script><script data-pjax>
+  function butterfly_swiper_injector_config(){
+    var parent_div_git = document.getElementById('recent-posts');
+    var item_html = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms;"><div class="blog-slider__item swiper-slide" style="width: 750px; opacity: 1; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;"><a class="blog-slider__img" href="2025/04/24/use/" alt=""><img width="48" height="48" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" alt="" onerror="this.src=https://unpkg.zhimg.com/akilar-candyassets/image/loading.gif; this.onerror = null;"/></a><div class="blog-slider__content"><span class="blog-slider__code">2025-04-24</span><a class="blog-slider__title" href="2025/04/24/use/" alt="">Creat</a><div class="blog-slider__text">创建模板</div><a class="blog-slider__button" href="2025/04/24/use/" alt="">详情   </a></div></div><div class="blog-slider__item swiper-slide" style="width: 750px; opacity: 1; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;"><a class="blog-slider__img" href="2025/04/19/测试/" alt=""><img width="48" height="48" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" alt="" onerror="this.src=https://unpkg.zhimg.com/akilar-candyassets/image/loading.gif; this.onerror = null;"/></a><div class="blog-slider__content"><span class="blog-slider__code">2025-04-19</span><a class="blog-slider__title" href="2025/04/19/测试/" alt="">测试1</a><div class="blog-slider__text">再怎么看我也不知道怎么描述它的啦！</div><a class="blog-slider__button" href="2025/04/19/测试/" alt="">详情   </a></div></div></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载butterfly_swiper')
+    parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_swiper_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_swiper_injector_config();
+  }
+  </script><script defer src="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper.min.js"></script><script defer data-pjax src="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper_init.js"></script><script async src="//at.alicdn.com/t/font_2032782_8d5kxvn09md.js"></script><div class="js-pjax"><script async="async">var arr = document.getElementsByClassName('recent-post-item');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__headShake');
+    arr[i].setAttribute('data-wow-duration', '800ms');
+    arr[i].setAttribute('data-wow-delay', '100ms');
+    arr[i].setAttribute('data-wow-offset', '100');
+    arr[i].setAttribute('data-wow-iteration', '2');
+  }</script><script async="async">var arr = document.getElementsByClassName('card-widget');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__zoomIn');
+    arr[i].setAttribute('data-wow-duration', '');
+    arr[i].setAttribute('data-wow-delay', '');
+    arr[i].setAttribute('data-wow-offset', '');
+    arr[i].setAttribute('data-wow-iteration', '');
+  }</script></div><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow.min.js"></script><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow_init.js"></script><!-- hexo injector body_end end --></body></html>

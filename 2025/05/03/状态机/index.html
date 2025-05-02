@@ -1,0 +1,283 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>状态机 | 一采🍭</title><meta name="author" content="onepink"><meta name="copyright" content="onepink"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="状态机的实现概述 定义: 状态机（Finite State Machine, FSM）是一种设计模式，通过有限的状态和事件驱动来管理系统的行为。 核心元素: 状态（State）: 系统当前所处的条件（如IDLE、RUNNING）。 事件（Event）: 触发状态转换的信号（如START、STOP）。 转换（Transition）: 状态之间的切换。 动作（Action）: 状态转换或持续执行时的操">
+<meta property="og:type" content="article">
+<meta property="og:title" content="状态机">
+<meta property="og:url" content="https://onepink0.github.io/2025/05/03/%E7%8A%B6%E6%80%81%E6%9C%BA/index.html">
+<meta property="og:site_name" content="一采🍭">
+<meta property="og:description" content="状态机的实现概述 定义: 状态机（Finite State Machine, FSM）是一种设计模式，通过有限的状态和事件驱动来管理系统的行为。 核心元素: 状态（State）: 系统当前所处的条件（如IDLE、RUNNING）。 事件（Event）: 触发状态转换的信号（如START、STOP）。 转换（Transition）: 状态之间的切换。 动作（Action）: 状态转换或持续执行时的操">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg">
+<meta property="article:published_time" content="2025-05-02T16:28:46.000Z">
+<meta property="article:modified_time" content="2025-05-02T16:29:24.298Z">
+<meta property="article:author" content="onepink">
+<meta property="article:tag" content="嵌入式, C, Python, Linux, 电子设计">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "状态机",
+  "url": "https://onepink0.github.io/2025/05/03/%E7%8A%B6%E6%80%81%E6%9C%BA/",
+  "image": "https://img.picui.cn/free/2025/04/29/6810399c73023.jpg",
+  "datePublished": "2025-05-02T16:28:46.000Z",
+  "dateModified": "2025-05-02T16:29:24.298Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "onepink",
+      "url": "https://onepink0.github.io/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://onepink0.github.io/2025/05/03/%E7%8A%B6%E6%80%81%E6%9C%BA/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          const hour = new Date().getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (theme === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else theme === 'light' ? activateLightMode() : activateDarkMode()
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":200,"highlightFullpage":true,"highlightMacStyle":true},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: {"chs_to_cht":"已切换为繁体中文","cht_to_chs":"已切换为简体中文","day_to_night":"已切换为深色模式","night_to_day":"已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-right"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '状态机',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/custom.css"><!-- hexo injector head_end start --><link rel="stylesheet" href="https://www.fomal.cc/static/css/runtime.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiperstyle.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/font-awesome-animation.min.css" media="defer" onload="this.media='all'"><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/tag_plugins.css" media="defer" onload="this.media='all'"><script src="https://npm.elemecdn.com/hexo-butterfly-tag-plugins-plus@latest/lib/assets/carousel-touch.js"></script><link rel="stylesheet" href="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/animate.min.css" media="print" onload="this.media='screen'"><!-- hexo injector head_end end --><meta name="generator" content="Hexo 7.3.0"></head><body><div id="web_bg" style="background-image: url(https://img.picui.cn/free/2025/04/29/6810399c73023.jpg);"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pink.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://img.picui.cn/free/2025/04/29/6810399c73023.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">一采🍭</span></a><a class="nav-page-title" href="/"><span class="site-name">状态机</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><span class="site-page group hide"><i class="fa-fw fas fa-list"></i><span> 列表</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></li></ul></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">状态机</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-05-02T16:28:46.000Z" title="发表于 2025-05-03 00:28:46">2025-05-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-05-02T16:29:24.298Z" title="更新于 2025-05-03 00:29:24">2025-05-03</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">1.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="container post-content" id="article-container"><h1 id="状态机的实现"><a href="#状态机的实现" class="headerlink" title="状态机的实现"></a>状态机的实现</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><ul>
+<li><strong>定义</strong>: 状态机（Finite State Machine, FSM）是一种设计模式，通过有限的状态和事件驱动来管理系统的行为。</li>
+<li><strong>核心元素</strong>:<ul>
+<li><strong>状态（State）</strong>: 系统当前所处的条件（如<code>IDLE</code>、<code>RUNNING</code>）。</li>
+<li><strong>事件（Event）</strong>: 触发状态转换的信号（如<code>START</code>、<code>STOP</code>）。</li>
+<li><strong>转换（Transition）</strong>: 状态之间的切换。</li>
+<li><strong>动作（Action）</strong>: 状态转换或持续执行时的操作。</li>
+</ul>
+</li>
+<li><strong>优点</strong>: 逻辑清晰、模块化、易维护，适合嵌入式系统。</li>
+</ul>
+<hr>
+<h2 id="简单方式-switch-case"><a href="#简单方式-switch-case" class="headerlink" title="简单方式(switch-case)"></a>简单方式(switch-case)</h2><ul>
+<li><p><strong>特点</strong>: 简单直接，适合小型状态机，状态和事件少时使用</p>
+</li>
+<li><p><strong>Code Example</strong>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> &#123;</span> STATE_IDLE, STATE_RUNNING, STATE_ERROR &#125; State;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> &#123;</span> EVENT_START, EVENT_STOP, EVENT_ERROR &#125; Event;</span><br><span class="line"><span class="type">static</span> State currentState = STATE_IDLE;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">state_machine_run</span><span class="params">(Event event)</span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> (currentState) &#123;</span><br><span class="line">        <span class="keyword">case</span> STATE_IDLE:	<span class="comment">//空闲 -&gt; 运行</span></span><br><span class="line">            <span class="keyword">if</span> (event == EVENT_START) currentState = STATE_RUNNING;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> STATE_RUNNING:<span class="comment">//运行 -&gt; 空闲、错误</span></span><br><span class="line">            <span class="keyword">if</span> (event == EVENT_STOP) currentState = STATE_IDLE;</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (event == EVENT_ERROR) currentState = STATE_ERROR;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> STATE_ERROR:	<span class="comment">//错误 -&gt; 空闲</span></span><br><span class="line">            <span class="keyword">if</span> (event == EVENT_STOP) currentState = STATE_IDLE;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 状态持续执行函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">state_execute</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> (currentState) &#123;</span><br><span class="line">        <span class="keyword">case</span> STATE_IDLE:</span><br><span class="line">            <span class="comment">// IDLE状态：</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> STATE_RUNNING:</span><br><span class="line">            <span class="comment">// RUNNING状态：</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">case</span> STATE_ERROR:</span><br><span class="line">            <span class="comment">// ERROR状态：</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;[Error] 无效状态: %d\n&quot;</span>, currentState);</span><br><span class="line">            currentState = STATE_IDLE;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="状态表方式"><a href="#状态表方式" class="headerlink" title="状态表方式"></a>状态表方式</h2><ul>
+<li><p><strong>特点</strong>: 使用数组或结构体定义转换规则，适合中大型状态机。</p>
+</li>
+<li><p><strong>Code Example</strong>: </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义状态枚举</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">    STATE_IDLE,    <span class="comment">// 空闲状态</span></span><br><span class="line">    STATE_RUNNING, <span class="comment">// 运行状态</span></span><br><span class="line">    STATE_ERROR,   <span class="comment">// 错误状态</span></span><br><span class="line">    STATE_MAX      <span class="comment">// 状态总数，用于状态表边界</span></span><br><span class="line">&#125; State;</span><br><span class="line"><span class="comment">// 定义事件枚举</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">    EVENT_START,   <span class="comment">// 开始事件</span></span><br><span class="line">    EVENT_STOP,    <span class="comment">// 停止事件</span></span><br><span class="line">    EVENT_ERROR,   <span class="comment">// 错误事件</span></span><br><span class="line">    EVENT_MAX      <span class="comment">// 事件总数，用于状态表边界</span></span><br><span class="line">&#125; Event;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义状态转换结构体</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">    State nextState;    <span class="comment">// 下一个状态</span></span><br><span class="line">    <span class="type">void</span> (*action)(<span class="type">void</span>); <span class="comment">// 可选动作函数（这里简化为NULL）</span></span><br><span class="line">&#125; Transition;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> State currentState = STATE_IDLE;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义状态表（核心部分）</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> Transition stateTable[STATE_MAX][EVENT_MAX] = &#123;</span><br><span class="line">    <span class="comment">// EVENT_START / EVENT_STOP / EVENT_ERROR</span></span><br><span class="line">      &#123;&#123;STATE_RUNNING, <span class="literal">NULL</span>&#125;, &#123;STATE_IDLE, <span class="literal">NULL</span>&#125;, &#123;STATE_IDLE, <span class="literal">NULL</span>&#125;&#125;, <span class="comment">// IDLE</span></span><br><span class="line">      &#123;&#123;STATE_RUNNING, <span class="literal">NULL</span>&#125;, &#123;STATE_IDLE, <span class="literal">NULL</span>&#125;, &#123;STATE_ERROR, <span class="literal">NULL</span>&#125;&#125;, <span class="comment">// RUNNING</span></span><br><span class="line">      &#123;&#123;STATE_ERROR, <span class="literal">NULL</span>&#125;, &#123;STATE_IDLE, <span class="literal">NULL</span>&#125;, &#123;STATE_ERROR, <span class="literal">NULL</span>&#125;&#125;    <span class="comment">// ERROR</span></span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 状态机事件处理函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">state_machine_run</span><span class="params">(Event event)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (event &gt;= EVENT_MAX) <span class="keyword">return</span>;</span><br><span class="line">    Transition trans = stateTable[currentState][event];</span><br><span class="line">    currentState = trans.nextState; <span class="comment">// 更新状态</span></span><br><span class="line">    <span class="keyword">if</span> (trans.action != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        trans.action(); <span class="comment">// 执行进入新状态的动作</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 状态持续执行函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">state_execute</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> (currentState) &#123;</span><br><span class="line">        <span class="keyword">case</span> STATE_IDLE:</span><br><span class="line">            <span class="comment">// IDLE状态：无动作</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> STATE_RUNNING:</span><br><span class="line">            <span class="comment">// RUNNING状态：持续运行逻辑</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> STATE_ERROR:</span><br><span class="line">            <span class="comment">// ERROR状态：持续错误处理</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;[Error] 无效状态: %d\n&quot;</span>, currentState);</span><br><span class="line">            currentState = STATE_IDLE;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 测试主函数</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;初始状态: IDLE\n&quot;</span>);</span><br><span class="line">    state_machine_run(EVENT_START);  <span class="comment">// IDLE -&gt; RUNNING</span></span><br><span class="line">    state_execute();</span><br><span class="line">    state_machine_run(EVENT_ERROR);  <span class="comment">// RUNNING -&gt; ERROR</span></span><br><span class="line">    state_execute();</span><br><span class="line">    state_machine_run(EVENT_STOP);   <span class="comment">// ERROR -&gt; IDLE</span></span><br><span class="line">    state_execute();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>Apply</strong></p>
+<h3 id="交通灯控制系统"><a href="#交通灯控制系统" class="headerlink" title="交通灯控制系统"></a>交通灯控制系统</h3><ul>
+<li><p>系统有三种状态：RED（红灯亮）、GREEN（绿灯亮）、YELLOW（黄灯亮）。</p>
+</li>
+<li><p>事件触发状态转换：</p>
+<ul>
+<li>TIMER：定时器到期，切换到下一状态。</li>
+<li>RESET：重置到红灯状态。</li>
+</ul>
+</li>
+<li><p>每个状态有持续动作（如点亮对应颜色的灯）。</p>
+</li>
+<li><p>目标</p>
+<ul>
+<li>使用状态表定义状态转换规则。</li>
+<li>分离事件处理和状态执行。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>​    <strong>Code</strong></p>
+  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line"></span><br><span class="line">// 定义状态枚举</span><br><span class="line">typedef enum &#123;</span><br><span class="line">    STATE_RED,     // 红灯状态</span><br><span class="line">    STATE_GREEN,   // 绿灯状态</span><br><span class="line">    STATE_YELLOW,  // 黄灯状态</span><br><span class="line">    STATE_MAX      // 状态总数</span><br><span class="line">&#125; State;</span><br><span class="line"></span><br><span class="line">// 定义事件枚举</span><br><span class="line">typedef enum &#123;</span><br><span class="line">    EVENT_TIMER,   // 定时器到期事件</span><br><span class="line">    EVENT_RESET,   // 重置事件</span><br><span class="line">    EVENT_MAX      // 事件总数</span><br><span class="line">&#125; Event;</span><br><span class="line"></span><br><span class="line">// 定义状态转换结构体</span><br><span class="line">typedef struct &#123;</span><br><span class="line">    State nextState;    // 下一个状态</span><br><span class="line">    void (*action)(void); // 进入状态时的动作</span><br><span class="line">&#125; Transition;</span><br><span class="line"></span><br><span class="line">// 模拟硬件操作（实际中替换为GPIO控制）</span><br><span class="line">void red_on(void) &#123; printf(&quot;[Action] 红灯亮\n&quot;); &#125;</span><br><span class="line">void green_on(void) &#123; printf(&quot;[Action] 绿灯亮\n&quot;); &#125;</span><br><span class="line">void yellow_on(void) &#123; printf(&quot;[Action] 黄灯亮\n&quot;); &#125;</span><br><span class="line">void all_off(void) &#123; printf(&quot;[Action] 所有灯熄灭\n&quot;); &#125;</span><br><span class="line"></span><br><span class="line">// 定义状态表</span><br><span class="line">static const Transition stateTable[STATE_MAX][EVENT_MAX] = &#123;</span><br><span class="line">    // 当前状态: STATE_RED</span><br><span class="line">    &#123;</span><br><span class="line">        &#123;STATE_GREEN, green_on&#125;,  // EVENT_TIMER -&gt; GREEN</span><br><span class="line">        &#123;STATE_RED, red_on&#125;       // EVENT_RESET -&gt; RED</span><br><span class="line">    &#125;,</span><br><span class="line">    // 当前状态: STATE_GREEN</span><br><span class="line">    &#123;</span><br><span class="line">        &#123;STATE_YELLOW, yellow_on&#125;, // EVENT_TIMER -&gt; YELLOW</span><br><span class="line">        &#123;STATE_RED, red_on&#125;        // EVENT_RESET -&gt; RED</span><br><span class="line">    &#125;,</span><br><span class="line">    // 当前状态: STATE_YELLOW</span><br><span class="line">    &#123;</span><br><span class="line">        &#123;STATE_RED, red_on&#125;,       // EVENT_TIMER -&gt; RED</span><br><span class="line">        &#123;STATE_RED, red_on&#125;        // EVENT_RESET -&gt; RED</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">// 定义全局变量：当前状态</span><br><span class="line">static State currentState = STATE_RED;</span><br><span class="line"></span><br><span class="line">// 状态机事件处理函数</span><br><span class="line">void state_machine_run(Event event) &#123;</span><br><span class="line">    if (event &gt;= EVENT_MAX) &#123;</span><br><span class="line">        printf(&quot;[Error] 无效事件: %d\n&quot;, event);</span><br><span class="line">        return;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    // 从状态表中获取转换规则</span><br><span class="line">    Transition trans = stateTable[currentState][event];</span><br><span class="line">    currentState = trans.nextState; // 更新状态</span><br><span class="line">    if (trans.action != NULL) &#123;</span><br><span class="line">        trans.action(); // 执行进入新状态的动作</span><br><span class="line">    &#125;</span><br><span class="line">    printf(&quot;[State] 当前状态: %d (0=RED, 1=GREEN, 2=YELLOW)\n&quot;, currentState);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 状态持续执行函数</span><br><span class="line">void state_execute(void) &#123;</span><br><span class="line">    switch (currentState) &#123;</span><br><span class="line">        case STATE_RED:</span><br><span class="line">            printf(&quot;[Execute] 红灯持续亮 - 等待5秒\n&quot;);</span><br><span class="line">            break;</span><br><span class="line">        case STATE_GREEN:</span><br><span class="line">            printf(&quot;[Execute] 绿灯持续亮 - 等待5秒\n&quot;);</span><br><span class="line">            break;</span><br><span class="line">        case STATE_YELLOW:</span><br><span class="line">            printf(&quot;[Execute] 黄灯持续亮 - 等待2秒\n&quot;);</span><br><span class="line">            break;</span><br><span class="line">        default:</span><br><span class="line">            printf(&quot;[Error] 无效状态: %d\n&quot;, currentState);</span><br><span class="line">            currentState = STATE_RED;</span><br><span class="line">            break;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// 测试主函数</span><br><span class="line">int main(void) &#123;</span><br><span class="line">    printf(&quot;初始状态: RED\n&quot;);</span><br><span class="line">    red_on(); // 初始化红灯</span><br><span class="line"></span><br><span class="line">    // 模拟交通灯循环</span><br><span class="line">    state_execute();           // RED持续执行</span><br><span class="line">    state_machine_run(EVENT_TIMER); // RED -&gt; GREEN</span><br><span class="line">    state_execute();           // GREEN持续执行</span><br><span class="line">    state_machine_run(EVENT_TIMER); // GREEN -&gt; YELLOW</span><br><span class="line">    state_execute();           // YELLOW持续执行</span><br><span class="line">    state_machine_run(EVENT_TIMER); // YELLOW -&gt; RED</span><br><span class="line">    state_execute();           // RED持续执行</span><br><span class="line">    state_machine_run(EVENT_RESET); // 重置到RED</span><br><span class="line">    state_execute();           // RED持续执行</span><br><span class="line"></span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>  Tips:<strong>事件可由中断或其他条件触发</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://onepink0.github.io">onepink</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://onepink0.github.io/2025/05/03/%E7%8A%B6%E6%80%81%E6%9C%BA/">https://onepink0.github.io/2025/05/03/%E7%8A%B6%E6%80%81%E6%9C%BA/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://onepink0.github.io" target="_blank">一采🍭</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/2025/04/29/Kalman%E6%BB%A4%E6%B3%A2/" title="kalmanl滤波"><img class="cover" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">kalmanl滤波</div></div><div class="info-2"><div class="info-item-1">卡尔曼滤波简介[TOC] 卡尔曼滤波（Kalman Filter）是一种高效的递归滤波器，用于从一系列不完全且含有噪声的测量数据中估计动态系统的状态。它在多个领域，如控制系统、导航、计算机视觉和经济学中都有广泛应用。卡尔曼滤波器的核心在于通过结合系统的动态模型和测量数据，在存在不确定性的情况下提供最优的状态估计。  基本原理卡尔曼滤波器通过两个主要步骤——预测（Predict）和更新（Update）——来实现状态估计：  预测：  根据系统模型预测当前状态。 更新状态的不确定性（用协方差表示）。   更新：  使用测量数据修正预测的状态。 根据测量噪声和预测的不确定性调整状态估计。     数学表示卡尔曼滤波器通常用于线性动态系统，其状态和测量过程可以用以下方程描述： 状态方程$\mathbf{x}k = \mathbf{F}_k \mathbf{x}{k-1} + \mathbf{B}_k \mathbf{u}_k + \mathbf{w}_k$  $\mathbf{x}_k$：时刻 (k)...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pink.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">onepink</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">2</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/onepink0"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/onepink0" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/671512108" target="_blank" title="Bili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a><a class="social-icon" href="https://qm.qq.com/q/HSaYN6T1qE" target="_blank" title="QQ"><i class="fab fa-qq" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E6%9C%BA%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="toc-text">状态机的实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A6%82%E8%BF%B0"><span class="toc-text">概述</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E5%8D%95%E6%96%B9%E5%BC%8F-switch-case"><span class="toc-text">简单方式(switch-case)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E8%A1%A8%E6%96%B9%E5%BC%8F"><span class="toc-text">状态表方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BA%A4%E9%80%9A%E7%81%AF%E6%8E%A7%E5%88%B6%E7%B3%BB%E7%BB%9F"><span class="toc-text">交通灯控制系统</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2025 By onepink</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"></div><script defer src="/js/cursor.js"></script><script id="canvas_nest" defer="defer" color="0,0,255" opacity="0.7" zIndex="-1" count="25" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><!-- hexo injector body_end start --> <script data-pjax>if(document.getElementById('recent-posts') && (location.pathname ==='/'|| '/' ==='all')){
+    var parent = document.getElementById('recent-posts');
+    var child = '<div class="recent-post-item" style="width:100%;height: auto"><div id="catalog_magnet"><div class="magnet_item"><a class="magnet_link" href="https://onepink0.github.io/categories/测试/"><div class="magnet_link_context" style=""><span style="font-weight:500;flex:1">📚 一采の嵌入式 (1)</span><span style="padding:0px 4px;border-radius: 8px;"><i class="fas fa-arrow-circle-right"></i></span></div></a></div><div class="magnet_item" style="visibility: hidden"></div><a class="magnet_link_more"  href="https://onepink0.github.io/categories" style="flex:1;text-align: center;margin-bottom: 10px;">查看更多...</a></div></div>';
+    console.log('已挂载magnet')
+    parent.insertAdjacentHTML("afterbegin",child)}
+     </script><style>#catalog_magnet{flex-wrap: wrap;display: flex;width:100%;justify-content:space-between;padding: 10px 10px 0 10px;align-content: flex-start;}.magnet_item{flex-basis: calc(50% - 5px);background: #f2f2f2;margin-bottom: 10px;border-radius: 8px;transition: all 0.2s ease-in-out;}.magnet_item:hover{background: #69e8f2}.magnet_link_more{color:#555}.magnet_link{color:black}.magnet_link:hover{color:white}@media screen and (max-width: 600px) {.magnet_item {flex-basis: 100%;}}.magnet_link_context{display:flex;padding: 10px;font-size:16px;transition: all 0.2s ease-in-out;}.magnet_link_context:hover{padding: 10px 20px;}</style>
+    <style></style><script data-pjax>
+  function butterfly_footer_beautify_injector_config(){
+    var parent_div_git = document.getElementById('footer-wrap');
+    var item_html = '<div id="workboard"></div><p id="ghbdages"><a class="github-badge" target="_blank" href="https://hexo.io/" style="margin-inline:5px" data-title="博客框架为Hexo_v6.2.0" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Frame-Hexo-blue?style=flat&amp;logo=hexo" alt=""/></a><a class="github-badge" target="_blank" href="https://butterfly.js.org/" style="margin-inline:5px" data-title="主题版本Butterfly_v4.3.1" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Theme-Butterfly-6513df?style=flat&amp;logo=bitdefender" alt=""/></a><a class="github-badge" target="_blank" href="https://github.com/" style="margin-inline:5px" data-title="本站项目由Github托管" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Source-Github-d021d6?style=flat&amp;logo=GitHub" alt=""/></a><a class="github-badge" target="_blank" href="http://creativecommons.org/licenses/by-nc-sa/4.0/" style="margin-inline:5px" data-title="本站采用知识共享署名-非商业性使用-相同方式共享4.0国际许可协议进行许可" title=""><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.shields.io/badge/Copyright-BY--NC--SA%204.0-d42328?style=flat&amp;logo=Claris" alt=""/></a></p>';
+    console.log('已挂载butterfly_footer_beautify')
+    parent_div_git.insertAdjacentHTML("beforeend",item_html)
+    }
+  var elist = 'null'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_footer_beautify_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_footer_beautify_injector_config();
+  }
+  </script><script async src="/js/runtime.js"></script><script data-pjax>
+  function butterfly_swiper_injector_config(){
+    var parent_div_git = document.getElementById('recent-posts');
+    var item_html = '<div class="recent-post-item" style="height: auto;width: 100%"><div class="blog-slider swiper-container-fade swiper-container-horizontal" id="swiper_container"><div class="blog-slider__wrp swiper-wrapper" style="transition-duration: 0ms;"><div class="blog-slider__item swiper-slide" style="width: 750px; opacity: 1; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;"><a class="blog-slider__img" href="2025/04/24/use/" alt=""><img width="48" height="48" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" alt="" onerror="this.src=https://unpkg.zhimg.com/akilar-candyassets/image/loading.gif; this.onerror = null;"/></a><div class="blog-slider__content"><span class="blog-slider__code">2025-04-24</span><a class="blog-slider__title" href="2025/04/24/use/" alt="">Creat</a><div class="blog-slider__text">创建模板</div><a class="blog-slider__button" href="2025/04/24/use/" alt="">详情   </a></div></div><div class="blog-slider__item swiper-slide" style="width: 750px; opacity: 1; transform: translate3d(0px, 0px, 0px); transition-duration: 0ms;"><a class="blog-slider__img" href="2025/04/19/测试/" alt=""><img width="48" height="48" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="https://img.picui.cn/free/2025/04/29/6810399c73023.jpg" alt="" onerror="this.src=https://unpkg.zhimg.com/akilar-candyassets/image/loading.gif; this.onerror = null;"/></a><div class="blog-slider__content"><span class="blog-slider__code">2025-04-19</span><a class="blog-slider__title" href="2025/04/19/测试/" alt="">测试1</a><div class="blog-slider__text">再怎么看我也不知道怎么描述它的啦！</div><a class="blog-slider__button" href="2025/04/19/测试/" alt="">详情   </a></div></div></div><div class="blog-slider__pagination swiper-pagination-clickable swiper-pagination-bullets"></div></div></div>';
+    console.log('已挂载butterfly_swiper')
+    parent_div_git.insertAdjacentHTML("afterbegin",item_html)
+    }
+  var elist = 'undefined'.split(',');
+  var cpage = location.pathname;
+  var epage = 'all';
+  var flag = 0;
+
+  for (var i=0;i<elist.length;i++){
+    if (cpage.includes(elist[i])){
+      flag++;
+    }
+  }
+
+  if ((epage ==='all')&&(flag == 0)){
+    butterfly_swiper_injector_config();
+  }
+  else if (epage === cpage){
+    butterfly_swiper_injector_config();
+  }
+  </script><script defer src="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper.min.js"></script><script defer data-pjax src="https://npm.elemecdn.com/hexo-butterfly-swiper/lib/swiper_init.js"></script><script async src="//at.alicdn.com/t/font_2032782_8d5kxvn09md.js"></script><div class="js-pjax"><script async="async">var arr = document.getElementsByClassName('recent-post-item');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__headShake');
+    arr[i].setAttribute('data-wow-duration', '800ms');
+    arr[i].setAttribute('data-wow-delay', '100ms');
+    arr[i].setAttribute('data-wow-offset', '100');
+    arr[i].setAttribute('data-wow-iteration', '2');
+  }</script><script async="async">var arr = document.getElementsByClassName('card-widget');
+for(var i = 0;i<arr.length;i++){
+    arr[i].classList.add('wow');
+    arr[i].classList.add('animate__zoomIn');
+    arr[i].setAttribute('data-wow-duration', '');
+    arr[i].setAttribute('data-wow-delay', '');
+    arr[i].setAttribute('data-wow-offset', '');
+    arr[i].setAttribute('data-wow-iteration', '');
+  }</script></div><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow.min.js"></script><script defer src="https://npm.elemecdn.com/hexo-butterfly-wowjs/lib/wow_init.js"></script><!-- hexo injector body_end end --></body></html>
